@@ -1,0 +1,60 @@
+﻿@page "/dialy"
+@inject IJSRuntime Js
+
+<PageTitle>Dialy</PageTitle>
+
+<h1>Dialy</h1>
+
+<Calendar @ref="cal" OnClick="ClickHandler" OnMonthClick="CheckDiary"  />
+
+<div class="text-center">
+    <textarea @bind="@TextValue" @bind:event="oninput" class="form-control mt-3" rows="3" />
+    <button class="btn btn-primary mt-4" @onclick="@(() => WriteDiary())" >日記を保存する</button>
+</div>
+
+@code{
+    // 日記データクラス
+    public class Diary
+    {
+        public DateTime SelectDay { get; set; }
+        public string Text { get; set; }
+    }
+    private Calendar cal;   // カレンダーコンポーネントの参照用
+
+    // テキスト表示用
+    string TextValue { get; set; }
+
+    // DOMが組み立てられた後に呼び出される
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) {
+            await CheckDiary(cal.SelectDay);
+            StateHasChanged();
+        }
+    }
+
+    // 日記がある日をExistsDatesプロパティに設定する
+    private async Task CheckDiary(DateTime dt)
+    {
+        // 月初
+        DateTime s = new DateTime(dt.Year, dt.Month, 1);
+        // 翌月月初
+        DateTime e = s.AddMonths(1);
+
+        // 指定月に存在する日記の日付を取得する
+        cal.ExistsDates =  await Js.InvokeAsync<DateTime[]>("getKeys", s, e);
+    }
+
+    private async Task ClickHandler(DateTime dt)
+    {
+        var v = await Js.InvokeAsync<Diary>("getDiary", dt);
+        TextValue = v?.Text ?? "日記がありません";
+    }
+
+    private async Task WriteDiary()
+    {
+        var key = await Js.InvokeAsync<string>("putDiary", new Diary{ SelectDay = cal.SelectDay, Text = TextValue});
+        await CheckDiary(cal.SelectDay);
+    }
+
+}
