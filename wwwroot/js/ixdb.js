@@ -17,6 +17,6 @@ function getDiary(key) {
 }
 
 // 指定範囲のキーを返す
-function getKeys(s, e) {
+function getDiaryKeys(s, e) {
     return db.diary.where("selectDay").between(s, e).keys();
 }

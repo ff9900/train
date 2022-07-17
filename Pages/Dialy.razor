@@ -42,7 +42,7 @@
         DateTime e = s.AddMonths(1);
 
         // 指定月に存在する日記の日付を取得する
-        cal.ExistsDates =  await Js.InvokeAsync<DateTime[]>("getKeys", s, e);
+        cal.ExistsDates =  await Js.InvokeAsync<DateTime[]>("getDiaryKeys", s, e);
     }
 
     private async Task ClickHandler(DateTime dt)
