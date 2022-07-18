@@ -1,0 +1,42 @@
+﻿@inject IJSRuntime Js
+
+<div class="todolist">
+    <h1>todolist</h1>
+
+    <ul>
+        @foreach (Guid id in Ids)
+        {
+            var v = GetTask(id);
+            <li>
+                <input type="text" @bind="@task.Name" />
+                <button @onclick="@(e => CompleteTask(id))">完了</button>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    public Guid[] Ids { get; set; }
+
+    public Model.Task task;
+
+    protected override async void OnInitialized()
+    {
+        await LoadTasks();
+    }
+
+    private async Task LoadTasks()
+    {
+        Ids = await Js.InvokeAsync<Guid[]>("getAllTaskKeys");
+    }
+
+    private async Task GetTask(Guid id)
+    {
+        task = await Js.InvokeAsync<Model.Task>("GetTask", id);
+    }
+
+    void CompleteTask(Guid id)
+    {
+        
+    }
+}

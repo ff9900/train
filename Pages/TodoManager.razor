@@ -1,0 +1,44 @@
+﻿@page "/todomanager"
+@inject IJSRuntime Js
+
+<PageTitle>Todo管理</PageTitle>
+
+<h1>Todo管理</h1>
+
+<TodoList @ref="list" />
+
+<input type="text" placeholder="Something todo" @bind="newTaskName"/>
+<input type="date" @bind="newTaskLimitDate"/>
+<button @onclick="AddTask">追加</button>
+
+
+@code{
+
+    private TodoList list;
+
+    string newTaskName { get; set; }
+
+    DateTime newTaskLimitDate { get; set; }
+
+    // DOMが組み立てられた後に呼び出される
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) {
+            await LoadTasks();
+            StateHasChanged();
+        }
+    }
+
+    // 日記がある日をExistsDatesプロパティに設定する
+    private async Task LoadTasks()
+    {
+        list.Ids = await Js.InvokeAsync<Guid[]>("getAllTaskKeys");
+    }
+
+    private async Task AddTask()
+    {
+        var key = await Js.InvokeAsync<string>("putTask", new Model.Task(newTaskName, newTaskLimitDate));
+        await LoadTasks();
+    }
+
+}
